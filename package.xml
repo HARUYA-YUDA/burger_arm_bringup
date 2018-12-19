@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>burger_arm_bringup</name>
+  <version>0.0.1</version>
+  <description>The burger_arm_bringup package</description>
+  <license>Apache-2.0</license>
+
+  <maintainer email="b1512539@planet.kanazawa-it.ac.jp">HaruyaYuda</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>mikata_arm_msgs</build_depend>
+  <build_depend>mikata_arm_toolbox</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>dynamixel_sdk</build_depend>
+  <build_depend>eigen</build_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>mikata_arm_msgs</exec_depend>
+  <exec_depend>mikata_arm_description</exec_depend>
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>dynamixel_sdk</exec_depend>
+  <exec_depend>eigen</exec_depend>
+
+</package>
