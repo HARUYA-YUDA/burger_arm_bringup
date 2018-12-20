@@ -24,12 +24,11 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../dynamixel_mikata_arm/mikata_arm_bringup/include
 )
 
-install(DIRECTORY include/${mikata_arm_bringup}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
 add_executable(burger_arm_bringup src/bringup.cpp)
+
 add_executable(burger_arm_gui_control src/gui_control.cpp)
 
 add_dependencies(burger_arm_bringup ${catkin_EXPORTED_TARGETS})
