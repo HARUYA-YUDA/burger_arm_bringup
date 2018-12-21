@@ -19,6 +19,8 @@
 
 std::string POSE_FILE = std::string(std::getenv("HOME")) + "/.robotis/mikata_arm/positions.txt";
 std::string MOTION_FILE = std::string(std::getenv("HOME")) + "/.robotis/mikata_arm/motion.txt";
+//macro
+#include "my_dxl_ctrl_table.h"
 
 //msgs
 #include <std_msgs/String.h>
@@ -41,6 +43,8 @@ bool onTime_cb(mikata_arm_msgs::onTime::Request &req, mikata_arm_msgs::onTime::R
 bool ik_cb(mikata_arm_msgs::InverseKinematics::Request &req, mikata_arm_msgs::InverseKinematics::Response &res);
 bool get_cb(mikata_arm_msgs::GetInfo::Request &req, mikata_arm_msgs::GetInfo::Response &res);
 bool set_cb(mikata_arm_msgs::SetInfo::Request &req, mikata_arm_msgs::SetInfo::Response &res);
+bool setcleaning_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
+bool setnormal_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 bool enableAll_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 bool disableAll_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 bool motion_on_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
@@ -60,7 +64,7 @@ int main(int argc, char** argv)
   setAcelAll(3, false);
   dxl_write(GRIPPER_ID, 30, ADDR_X_PROFILE_VEL, sizeof(int32_t));
   dxl_write(GRIPPER_ID, 250, ADDR_X_P_GAIN, sizeof(int16_t));
-  
+ 
   ros::init(argc, argv, "bringup_pub");
   ros::NodeHandle n;
   
@@ -76,6 +80,8 @@ int main(int argc, char** argv)
   //Services
   ros::ServiceServer get_srv = n.advertiseService("get_info", get_cb);
   ros::ServiceServer set_srv = n.advertiseService("set_info", set_cb);
+  ros::ServiceServer setcleaning_srv = n.advertiseService("set_info", setcleaning_cb);
+  ros::ServiceServer setnormal_srv = n.advertiseService("set_info", setnormal_cb);
   ros::ServiceServer onTime_srv = n.advertiseService("move_on_time", onTime_cb);
   ros::ServiceServer ik_srv = n.advertiseService("inverse_kinematics", ik_cb);
   ros::ServiceServer enable_srv = n.advertiseService("enable_all", enableAll_cb);
@@ -214,6 +220,8 @@ bool ik_cb(mikata_arm_msgs::InverseKinematics::Request &req, mikata_arm_msgs::In
 
 #define MAKE_CB(name, func, msg) bool name(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) { func; res.message = msg; res.success = true; return true; }
 
+MAKE_CB(setcleaning_cb,dxl_write(2, CURRENT_CONTROL_MODE, ADDR_X_OPERATING_MODE, sizeof(int8_t)) , "cleaning mode")
+MAKE_CB(setnormal_cb,dxl_write(2, POSITION_CONTROL_MODE, ADDR_X_OPERATING_MODE, sizeof(int8_t)) , "normal mode")
 MAKE_CB(enableAll_cb, enableAll(), "Enabled all")
 MAKE_CB(disableAll_cb, disableAll(), "Disabled all")
 MAKE_CB(motion_on_cb, enableAll(); motion_player.start(), "MotionPlayer started")
