@@ -35,9 +35,11 @@ std::string MOTION_FILE = std::string(std::getenv("HOME")) + "/.robotis/mikata_a
 #include "mikata_arm_msgs/onTime.h"
 #include "mikata_arm_msgs/InverseKinematics.h"
 #include "std_srvs/Trigger.h"
+#include "cleaning.h"
 
 //call backs
 void goal_position_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg);
+void goal_current_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg);
 void profile_velocity_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg);
 bool onTime_cb(mikata_arm_msgs::onTime::Request &req, mikata_arm_msgs::onTime::Response &res);
 bool ik_cb(mikata_arm_msgs::InverseKinematics::Request &req, mikata_arm_msgs::InverseKinematics::Response &res);
@@ -64,12 +66,13 @@ int main(int argc, char** argv)
   setAcelAll(3, false);
   dxl_write(GRIPPER_ID, 30, ADDR_X_PROFILE_VEL, sizeof(int32_t));
   dxl_write(GRIPPER_ID, 250, ADDR_X_P_GAIN, sizeof(int16_t));
- 
+
   ros::init(argc, argv, "bringup_pub");
   ros::NodeHandle n;
   
   //Subscribers
   ros::Subscriber goal_position_sub = n.subscribe("dxl/goal_position", 1000, goal_position_cb);
+  ros::Subscriber goal_current_sub = n.subscribe("dxl/goal_current", 1000, goal_current_cb);
   ros::Subscriber profile_velocity_sub = n.subscribe("dxl/set_profile_vel", 1000, profile_velocity_cb);
 
   //Publishers
@@ -80,8 +83,8 @@ int main(int argc, char** argv)
   //Services
   ros::ServiceServer get_srv = n.advertiseService("get_info", get_cb);
   ros::ServiceServer set_srv = n.advertiseService("set_info", set_cb);
-  ros::ServiceServer setcleaning_srv = n.advertiseService("set_info", setcleaning_cb);
-  ros::ServiceServer setnormal_srv = n.advertiseService("set_info", setnormal_cb);
+  ros::ServiceServer setcleaning_srv = n.advertiseService("set_cleaning", setcleaning_cb);
+  ros::ServiceServer setnormal_srv = n.advertiseService("set_normal", setnormal_cb);
   ros::ServiceServer onTime_srv = n.advertiseService("move_on_time", onTime_cb);
   ros::ServiceServer ik_srv = n.advertiseService("inverse_kinematics", ik_cb);
   ros::ServiceServer enable_srv = n.advertiseService("enable_all", enableAll_cb);
@@ -153,6 +156,10 @@ void goal_position_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg) {
   writeAll(msg->id, msg->data);
 }
 
+void goal_current_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg) {
+  setCurAll(msg->id, torque2dxl(msg->data));
+}
+
 void profile_velocity_cb (const mikata_arm_msgs::dxl_double::ConstPtr& msg) {
   setVelAll(msg->id, radsec2vel(msg->data));
 }
@@ -220,8 +227,8 @@ bool ik_cb(mikata_arm_msgs::InverseKinematics::Request &req, mikata_arm_msgs::In
 
 #define MAKE_CB(name, func, msg) bool name(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) { func; res.message = msg; res.success = true; return true; }
 
-MAKE_CB(setcleaning_cb,dxl_write(2, CURRENT_CONTROL_MODE, ADDR_X_OPERATING_MODE, sizeof(int8_t)) , "cleaning mode")
-MAKE_CB(setnormal_cb,dxl_write(2, POSITION_CONTROL_MODE, ADDR_X_OPERATING_MODE, sizeof(int8_t)) , "normal mode")
+MAKE_CB(setcleaning_cb, setcleaning() , "Cleaning mode")
+MAKE_CB(setnormal_cb, setnormal(), "normal mode")
 MAKE_CB(enableAll_cb, enableAll(), "Enabled all")
 MAKE_CB(disableAll_cb, disableAll(), "Disabled all")
 MAKE_CB(motion_on_cb, enableAll(); motion_player.start(), "MotionPlayer started")
