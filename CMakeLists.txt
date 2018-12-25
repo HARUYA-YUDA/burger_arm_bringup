@@ -25,14 +25,16 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/../dynamixel_mikata_arm/mikata_arm_bringup/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../burger_clean/include
 )
 
 add_executable(burger_arm_bringup src/bringup.cpp)
-
 add_executable(burger_arm_gui_control src/gui_control.cpp)
+add_executable(sample_arm ${CMAKE_CURRENT_SOURCE_DIR}/../burger_clean/src/sample.cpp)
 
 add_dependencies(burger_arm_bringup ${catkin_EXPORTED_TARGETS})
 add_dependencies(burger_arm_gui_control ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(burger_arm_bringup ${catkin_LIBRARIES})
 target_link_libraries(burger_arm_gui_control ${catkin_LIBRARIES})
+target_link_libraries(sample_arm ${catkin_LIBRARIES})
